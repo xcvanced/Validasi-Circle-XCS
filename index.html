@@ -333,8 +333,31 @@ async function cekMembership(){
 
       if(dataProxy && dataProxy.success === true && dataProxy.data){
         const canSubscribe = dataProxy.data.can_subscribe === true;
-        const statusText = canSubscribe ? "Tidak tergabung Dalam Circle" : "Masih/Sedang Tergabung Dalam Circle atau Umur kartu masih di bawah 60 hari";
-        const statusColor = canSubscribe ? "green" : "red";
+const info = (dataProxy.data.information || "").toLowerCase();
+
+let statusText = "";
+let statusColor = "";
+
+/* =========================
+   MAPPING KHUSUS BENDITH → LEON STYLE
+========================= */
+if(info.includes("sudah terdaftar")){
+  statusText = "Masih/Sedang Tergabung Dalam Circle";
+  statusColor = "red";
+}
+else if(info.includes("belum memenuhi syarat")){
+  statusText = "Umur kartu masih di bawah 60 hari";
+  statusColor = "red";
+}
+else if(info.includes("belum terdaftar")){
+  statusText = "Tidak tergabung Dalam Circle";
+  statusColor = "green";
+}
+else{
+  // fallback default
+  statusText = canSubscribe ? "Bisa beli paket Circle" : "Tidak bisa beli paket Circle";
+  statusColor = canSubscribe ? "green" : "red";
+}
 
         let notice = "";
 
