@@ -1,97 +1,142 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XC-Store Checker</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cek Kuota</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 
+:root{
+  --bg:#efeff2;
+  --card:#ffffff;
+  --text:#111;
+  --muted:#8f8f8f;
+  --line:#e6e6e6;
+  --soft:#f7f7f8;
+  --green:#16a34a;
+  --yellow:#ca8a04;
+  --red:#dc2626;
+}
+
 body{
-  font-family:'Inter',sans-serif;
-  background:#f3f4f6;
-  padding:20px;
+  font-family:'Poppins',sans-serif;
+  background:var(--bg);
+  padding:14px;
+  color:var(--text);
 }
 
-.box{
+.wrap{
   max-width:420px;
-  margin:40px auto;
+  margin:auto;
+}
+
+.hero{
   background:#fff;
-  border-radius:24px;
-  padding:22px;
-  box-shadow:0 15px 40px rgba(0,0,0,.06);
-}
-
-h2 i{
-  font-size:35px;
-}
-
-h2{
-  font-size:25px;
-  font-weight:800;
+  border-radius:20px;
+  padding:12px;
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:12px;
+  margin-bottom:10px;
 }
 
-.badge{
-  font-size:9px;
-  font-weight:600;
-  padding:2px 6px;
-  border-radius:999px;
-  background:#fef9c3;
-  color:#92400e;
-  border:1px solid #fde68a;
+.hero-icon{
+  width:48px;
+  height:48px;
+  background:#111;
+  color:#fff;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  font-size:18px;
+}
+
+.hero-text{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.hero-title{
+  font-size:12.5px;
+  font-weight:800;
+  line-height:1.3;
+  margin-bottom:2px;
+}
+
+.hero-sub{
+  font-size:10px;
+  color:#888;
+  line-height:1.35;
+}
+
+.card{
+  background:#fff;
+  border-radius:20px;
+  padding:12px;
+}
+
+.input-box{
   position:relative;
-  top:-6px;
+  margin-bottom:8px;
 }
 
-.desc{
-  font-size:14px;
-  color:#777;
-  margin:10px 0 18px;
-}
-
-.input-wrap{
-  position:relative;
-}
-
-.input-wrap i{
+.input-box i{
   position:absolute;
-  left:14px;
+  left:13px;
   top:50%;
   transform:translateY(-50%);
-  color:#aaa;
+  font-size:12px;
+  color:#9b9b9b;
 }
 
 input{
   width:100%;
-  height:54px;
-  border-radius:16px;
-  border:1px solid #e5e7eb;
-  padding:0 14px 0 40px;
-  font-size:15px;
+  height:48px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  padding:0 12px 0 38px;
+  font-size:12.5px;
+  font-weight:700;
+  font-family:inherit;
+  outline:none;
+  color:var(--text);
+  background:#fff;
+}
+
+input::placeholder{
+  color:#a5a5a5;
+  font-weight:500;
 }
 
 .btn-group{
   display:flex;
-  gap:10px;
-  margin-top:12px;
+  gap:8px;
 }
 
 button{
-  flex:1;
-  height:50px;
+  width:100%;
+  height:40px;
   border:none;
   border-radius:16px;
   background:#111;
   color:#fff;
-  font-weight:600;
+  font-size:11.5px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
   cursor:pointer;
+  font-family:inherit;
 }
 
 button:disabled{
@@ -99,191 +144,454 @@ button:disabled{
   cursor:not-allowed;
 }
 
-#hasil{
-  margin-top:16px;
+.result{
+  margin-top:8px;
 }
 
-.card{
-  background:#fafafa;
-  border-radius:18px;
-  padding:16px;
-  border:1px solid #eee;
+.section{
+  margin-top:8px;
+  background:var(--soft);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:10px;
 }
 
-.title{
-  font-weight:700;
-  margin-bottom:12px;
+.section-head{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:7px;
+  margin-bottom:6px;
 }
 
-.row{
-  margin-bottom:12px;
+.section-head i{
+  font-size:11px;
+  color:#333;
+  flex-shrink:0;
 }
 
-.label{
-  font-size:12px;
-  color:#777;
-}
-
-.value{
-  font-size:15px;
-  word-break:break-word;
-}
-
-.red{color:#ef4444;font-weight:700;}
-.green{color:#22c55e;font-weight:700;}
-.gray{color:#6b7280;font-weight:700;}
-
-.notice{
-  margin-top:14px;
-  padding:12px 14px;
-  font-size:13px;
-  font-weight:600;
-  line-height:1.6;
-  display:flex;
-  gap:10px;
-  border-radius:16px;
-  border:1px solid rgba(0,0,0,.05);
-  background:#fff;
-  box-shadow:0 6px 14px rgba(0,0,0,.04);
-}
-
-.notice.red{
-  background:#fef2f2;
-  border:1px solid #fecaca;
-  color:#b91c1c;
-}
-
-.notice.green{
-  background:#ecfdf5;
-  border:1px solid #bbf7d0;
-  color:#166534;
-}
-
-.notice.gray{
-  background:#f3f4f6;
-  border:1px solid #e5e7eb;
-  color:#374151;
-}
-
-.notice i{
-  font-size:16px;
-  margin-top:2px;
-}
-
-.progress{
-  height:12px;
-  background:#e5e7eb;
-  border-radius:999px;
-  overflow:hidden;
-  margin:10px 0 14px;
-}
-
-.progress-bar{
-  height:100%;
-  background:linear-gradient(90deg,#22c55e,#16a34a);
+.section-title{
+  font-size:11.5px;
+  font-weight:800;
+  line-height:1.3;
 }
 
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px;
+  gap:6px;
 }
 
-.box-mini{
+.info-card{
   background:#fff;
-  border-radius:14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:8px;
+}
+
+.info-label{
+  font-size:9.5px;
+  color:#888;
+  line-height:1.35;
+}
+
+.info-value{
+  font-size:11.5px;
+  font-weight:700;
+  margin-top:2px;
+  line-height:1.4;
+  word-break:break-word;
+}
+
+.compact-subs{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  font-size:11.5px;
+  font-weight:700;
+}
+
+.compact-subs-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  flex:1;
+}
+
+.compact-subs-left i{
+  font-size:12px;
+  color:#333;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.compact-subs-text{
+  line-height:1.4;
+  display:flex;
+  align-items:center;
+  min-height:18px;
+  word-break:break-word;
+}
+
+.compact-subs-right{
+  font-size:10px;
+  color:#666;
+  cursor:pointer;
+  white-space:nowrap;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.package-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
   padding:10px;
-  border:1px solid #eee;
+  margin-bottom:6px;
+}
+
+.package-card:last-child{
+  margin-bottom:0;
+}
+
+.package-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.package-name{
+  font-size:10.9px;
+  font-weight:600;
+  line-height:1.45;
+  flex:1;
+  word-break:break-word;
+}
+
+.package-date{
+  font-size:9.7px;
+  color:#777;
+  line-height:1.35;
+  text-align:right;
+  flex-shrink:0;
+}
+
+.quota-item{
+  border-top:1px solid #eee;
+  padding-top:8px;
+  margin-top:8px;
+}
+
+.quota-item:first-of-type{
+  border-top:none;
+  padding-top:0;
+  margin-top:0;
+}
+
+.quota-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:6px;
+}
+
+.quota-name{
+  font-size:9.9px;
+  font-weight:600;
+  line-height:1.4;
+  flex:1;
+  word-break:break-word;
+}
+
+.quota-amount{
+  font-size:9.7px;
+  color:#5f5f5f;
+  font-weight:600;
+  line-height:1.4;
+  text-align:right;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+
+.progress{
+  height:6px;
+  background:#ddd;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.bar{
+  height:100%;
+  border-radius:999px;
+}
+
+.bar.green{background:var(--green);}
+.bar.yellow{background:var(--yellow);}
+.bar.red{background:var(--red);}
+
+.status{
+  margin-top:8px;
+  padding:10px 11px;
+  border-radius:14px;
+  font-size:11px;
+  display:flex;
+  gap:6px;
+  align-items:center;
+  line-height:1.5;
+  background:#fff;
+  border:1px solid #ddd;
+}
+
+.status.green{
+  background:#ecfdf5;
+  border:1px solid #bbf7d0;
+  color:#166534;
+}
+
+.status.red{
+  background:#fef2f2;
+  border:1px solid #fecaca;
+  color:#b91c1c;
+}
+
+.status.gray{
+  background:#f3f4f6;
+  border:1px solid #e5e7eb;
+  color:#374151;
 }
 
 .footer{
   text-align:center;
-  margin-top:24px;
-  font-size:12px;
+  font-size:10px;
   color:#999;
+  margin-top:10px;
+}
+
+.empty-text{
+  font-size:10.5px;
+  color:#888;
+  line-height:1.5;
+}
+
+.membership-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+}
+
+.membership-row{
+  margin-bottom:8px;
+}
+
+.membership-row:last-child{
+  margin-bottom:0;
+}
+
+.membership-label{
+  font-size:9.5px;
+  color:#888;
+  line-height:1.35;
+}
+
+.membership-value{
+  font-size:11.5px;
+  font-weight:700;
+  margin-top:2px;
+  line-height:1.45;
+  word-break:break-word;
+}
+
+@media(max-width:400px){
+  .grid{
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
 }
 </style>
 </head>
 
 <body>
+<div class="wrap">
 
-<div class="box">
-  <h2>
-    <i class="fa-solid fa-sim-card"></i>
-    Circle Checker
-    <span class="badge">by XC-Store</span>
-  </h2>
-  <div class="desc">Validasi Membership & Cek Kuota XL Circle</div>
-
-  <div class="input-wrap">
-    <i class="fa-solid fa-phone"></i>
-    <input type="text" id="msisdn" placeholder="Masukkan nomor HP">
+  <div class="hero">
+    <div class="hero-icon">
+      <i class="fa-solid fa-signal"></i>
+    </div>
+    <div class="hero-text">
+      <div class="hero-title">Cek Kuota XL & AXIS</div>
+      <div class="hero-sub">by XC-Store Apps</div>
+    </div>
   </div>
 
-  <div class="btn-group">
-    <button onclick="cekMembership()" id="btnMembership">Validasi Membership</button>
-    <button onclick="cekKuota()" id="btnKuota">Cek Kuota</button>
+  <div class="card">
+    <div class="input-box">
+      <i class="fa-solid fa-phone"></i>
+      <input id="nomor" type="tel" placeholder="Masukkan nomor..."
+      oninput="this.value = formatInputDisplay(this.value)" />
+    </div>
+
+    <div class="btn-group">
+      <button onclick="cekMembership()" id="btnMembership">
+        <i class="fa-solid fa-id-card"></i> Validasi Membership
+      </button>
+      <button onclick="cek()" id="btnCek">
+        <i class="fa-solid fa-paper-plane"></i> Cek Kuota
+      </button>
+    </div>
+
+    <div id="result" class="result"></div>
   </div>
 
-  <div id="hasil">Belum ada data.</div>
+  <div class="footer">Powered by XC-Store</div>
 </div>
 
-<div class="footer">© 2026 XC-Store. All Rights Reserved.</div>
-
 <script>
-const input = document.getElementById("msisdn");
-const hasil = document.getElementById("hasil");
-const btnMembership = document.getElementById("btnMembership");
-const btnKuota = document.getElementById("btnKuota");
+function normalizeNumber(input){
+  let n = String(input || '').replace(/\D/g,'');
 
-const KUOTA_ENDPOINT = "/api/cek";
-
-function normalizeInputNumber(v){
-  let n = String(v || "").replace(/[^\d+]/g,'').trim();
-
-  if(n.startsWith('+62')) n = '0' + n.slice(3);
-  else if(n.startsWith('62')) n = '0' + n.slice(2);
-  else if(n.startsWith('8')) n = '0' + n;
-
-  n = n.replace(/\D/g,'');
+  if(n.startsWith('62')){
+    n = '0' + n.slice(2);
+  }else if(n.startsWith('8')){
+    n = '0' + n;
+  }
 
   return n;
 }
 
-function to0(v){
-  let n = normalizeInputNumber(v);
+function formatInputDisplay(value){
+  let n = String(value || '').replace(/\D/g,'');
+
+  if(n.startsWith('62')){
+    return '0' + n.slice(2);
+  }else if(n.startsWith('8')){
+    return '0' + n;
+  }
+
+  return n;
+}
+
+function to0(input){
+  let n = normalizeNumber(input);
   if(n.startsWith('62')) n = '0' + n.slice(2);
   if(n.startsWith('8')) n = '0' + n;
   return n;
 }
 
-function to62(v){
-  let n = normalizeInputNumber(v);
+function to62(input){
+  let n = normalizeNumber(input);
   if(n.startsWith('0')) return '62' + n.slice(1);
   if(n.startsWith('8')) return '62' + n;
   return n;
 }
 
-function escapeHtml(str){
-  return String(str ?? "-")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+function escapeHtml(text){
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
-input.addEventListener("input", function(){
-  this.value = normalizeInputNumber(this.value);
-});
+function toggleDetail(){
+  const el = document.getElementById('detailSubs');
+  if(!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
 
-function setLoading(button, textLoading){
+function infoCard(label,val){
+  return `<div class="info-card">
+    <div class="info-label">${label}</div>
+    <div class="info-value">${val}</div>
+  </div>`;
+}
+
+function parsePercent(value){
+  const n = parseFloat(String(value ?? '').replace(',', '.').replace(/[^\d.]/g,''));
+  if(isNaN(n)) return 0;
+  return Math.max(0, Math.min(100, n));
+}
+
+function getColor(p){
+  if(p <= 20) return 'red';
+  if(p <= 60) return 'yellow';
+  return 'green';
+}
+
+function renderSubsCompact(s, nomor, v){
+  return `
+    <div class="section">
+      <div class="compact-subs">
+        <div class="compact-subs-left">
+          <i class="fa-solid fa-sim-card"></i>
+          <div class="compact-subs-text">
+            ${escapeHtml(s.msisdn || nomor)} • ${escapeHtml(s.operator || '-')} • ${escapeHtml(s.net_type || '-')}
+          </div>
+        </div>
+        <div onclick="toggleDetail()" class="compact-subs-right">Detail</div>
+      </div>
+
+      <div id="detailSubs" style="display:none;margin-top:6px;">
+        <div class="grid">
+          ${infoCard('Registrasi', escapeHtml(s.id_verified || '-'))}
+          ${infoCard('Umur', escapeHtml(s.tenure || '-'))}
+          ${infoCard('Aktif', escapeHtml(s.exp_date || '-'))}
+          ${infoCard('Tenggang', escapeHtml(s.grace_until || '-'))}
+          ${infoCard('Volte Area', v && v.area ? 'Ya' : 'Tidak')}
+          ${infoCard('Volte SIM', v && v.simcard ? 'Ya' : 'Tidak')}
+          ${infoCard('Volte Device', v && v.device ? 'Ya' : 'Tidak')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPackages(packages){
+  if(!Array.isArray(packages) || !packages.length){
+    return `<div class="empty-text">Paket data tidak ditemukan.</div>`;
+  }
+
+  return packages.map(p => {
+    const quotas = Array.isArray(p.quotas) ? p.quotas : [];
+
+    return `
+      <div class="package-card">
+        <div class="package-head">
+          <div class="package-name">${escapeHtml(p.name || '-')}</div>
+          <div class="package-date">${escapeHtml(p.expiry || '-')}</div>
+        </div>
+
+        ${quotas.map(q => {
+          const percent = parsePercent(q.percent);
+          return `
+            <div class="quota-item">
+              <div class="quota-row">
+                <div class="quota-name">${escapeHtml(q.name || '-')}</div>
+                <div class="quota-amount">${escapeHtml(q.remaining || '-')} / ${escapeHtml(q.total || '-')}</div>
+              </div>
+
+              <div class="progress">
+                <div class="bar ${getColor(percent)}" style="width:${percent}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function setLoading(button, html){
   button.disabled = true;
   button.dataset.original = button.innerHTML;
-  button.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${textLoading}`;
+  button.innerHTML = html;
 }
 
 function unsetLoading(button){
@@ -293,157 +601,199 @@ function unsetLoading(button){
   }
 }
 
-function showInputError(){
-  hasil.innerHTML = `
-    <div class="notice red">
-      <i class="fa-solid fa-circle-exclamation"></i>
-      Isi nomor HP yang valid dulu.
-    </div>
-  `;
-}
-
-function renderMembership(msisdn, canSubscribe, infoText, sourceName){
-  const statusColor = canSubscribe ? "green" : "red";
-  const statusText = canSubscribe ? "Bisa beli paket Circle" : "Tidak bisa beli paket Circle";
-
-  const notice = canSubscribe
-    ? `<div class="notice green"><i class="fa-solid fa-circle-check"></i>Nomor ini belum terdaftar di group Circle, jadi bisa lanjut beli paket.</div>`
-    : `<div class="notice red"><i class="fa-solid fa-circle-xmark"></i>Nomor ini sudah terdaftar di group Circle, jadi belum bisa beli lagi.</div>`;
-
-  hasil.innerHTML = `
-    <div class="card">
-      <div class="title"><i class="fa-solid fa-id-card"></i> Membership</div>
-
-      <div class="row">
-        <div class="label">MSISDN</div>
-        <div class="value">${escapeHtml(msisdn)}</div>
-      </div>
-
-      <div class="row">
-        <div class="label">Status</div>
-        <div class="value ${statusColor}">${escapeHtml(statusText)}</div>
-      </div>
-
-      <div class="row">
-        <div class="label">Keterangan</div>
-        <div class="value">${escapeHtml(infoText)}</div>
-      </div>
-
-      <div class="row">
-        <div class="label">Sumber</div>
-        <div class="value">${escapeHtml(sourceName)}</div>
-      </div>
-
-      ${notice}
-    </div>
-  `;
-}
-
 async function cekMembership(){
-  const nomor0 = to0(input.value);
-  const nomor62 = to62(input.value);
+  const nomor0 = to0(document.getElementById('nomor').value);
+  const nomor62 = to62(document.getElementById('nomor').value);
+  const resBox = document.getElementById('result');
+  const btn = document.getElementById('btnMembership');
 
-  if(!nomor0 || nomor0.length < 10){
-    showInputError();
+  if(!nomor0){
+    resBox.innerHTML = `
+      <div class="status red">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>Nomor belum diisi</span>
+      </div>
+    `;
     return;
   }
 
-  setLoading(btnMembership, "Loading");
+  setLoading(btn, '<i class="fa-solid fa-spinner fa-spin"></i> Loading');
 
-  hasil.innerHTML = `
-    <div class="notice gray">
+  resBox.innerHTML = `
+    <div class="status gray">
       <i class="fa-solid fa-spinner fa-spin"></i>
-      Sedang validasi membership...
+      <span>Sedang validasi membership...</span>
     </div>
   `;
 
   try{
-    // 1. PRIORITAS BENDITH VIA PROXY SENDIRI
+    // PRIORITAS BENDITH VIA PROXY SENDIRI
     try{
-      const resProxy = await fetch('/api/membership?number=' + encodeURIComponent(nomor0), {
+      const res = await fetch('/api/membership?number=' + encodeURIComponent(nomor0), {
         cache: 'no-store'
       });
-      const rawProxy = await resProxy.text();
+      const raw = await res.text();
 
-      let dataProxy;
+      let data;
       try{
-        dataProxy = JSON.parse(rawProxy);
+        data = JSON.parse(raw);
       }catch{
-        dataProxy = null;
+        data = null;
       }
 
-      if(dataProxy && dataProxy.success === true && dataProxy.data){
-        const canSubscribe = dataProxy.data.can_subscribe === true;
-        const infoText = dataProxy.data.information || "-";
-        renderMembership(nomor0, canSubscribe, infoText, "bendith-proxy");
+      if(data && data.success === true && data.data){
+        const canSubscribe = data.data.can_subscribe === true;
+        const infoText = data.data.information || '-';
+
+        resBox.innerHTML = `
+          <div class="section">
+            <div class="section-head">
+              <i class="fa-solid fa-id-card"></i>
+              <div class="section-title">Membership Circle</div>
+            </div>
+
+            <div class="membership-card">
+              <div class="membership-row">
+                <div class="membership-label">MSISDN</div>
+                <div class="membership-value">${escapeHtml(nomor0)}</div>
+              </div>
+
+              <div class="membership-row">
+                <div class="membership-label">Status</div>
+                <div class="membership-value ${canSubscribe ? 'green' : 'red'}">
+                  ${canSubscribe ? 'Bisa beli paket Circle' : 'Tidak bisa beli paket Circle'}
+                </div>
+              </div>
+
+              <div class="membership-row">
+                <div class="membership-label">Keterangan</div>
+                <div class="membership-value">${escapeHtml(infoText)}</div>
+              </div>
+
+              <div class="membership-row">
+                <div class="membership-label">Sumber</div>
+                <div class="membership-value">bendith-proxy</div>
+              </div>
+            </div>
+
+            <div class="status ${canSubscribe ? 'green' : 'red'}">
+              <i class="fa-solid ${canSubscribe ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+              <span>
+                ${canSubscribe
+                  ? 'Nomor ini belum terdaftar di group Circle, jadi bisa lanjut beli paket.'
+                  : 'Nomor ini sudah terdaftar di group Circle, jadi belum bisa beli lagi.'}
+              </span>
+            </div>
+          </div>
+        `;
         return;
       }
-    }catch(err){
-      console.warn("Proxy membership gagal:", err);
+    }catch(e){
+      console.warn('Proxy membership gagal:', e);
     }
 
-    // 2. FALLBACK LEONSKENNEDY
+    // FALLBACK LEONSKENNEDY
     try{
-      const resLeon = await fetch(`https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${encodeURIComponent(nomor62)}`, {
+      const res = await fetch(`https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${encodeURIComponent(nomor62)}`, {
         cache: 'no-store'
       });
-      const rawLeon = await resLeon.text();
+      const raw = await res.text();
 
-      let dataLeon;
+      let data;
       try{
-        dataLeon = JSON.parse(rawLeon);
+        data = JSON.parse(raw);
       }catch{
-        dataLeon = null;
+        data = null;
       }
 
-      if(dataLeon && dataLeon.ok === true){
-        const statusColor = String(dataLeon.membership?.status_color || "").toLowerCase();
-        const canSubscribe = statusColor === "green";
-        const infoText = dataLeon.membership?.status_text || "-";
-        renderMembership(nomor62, canSubscribe, infoText, "leonskennedy");
+      if(data && data.ok === true){
+        const statusColor = String(data.membership?.status_color || '').toLowerCase();
+        const canSubscribe = statusColor === 'green';
+        const infoText = data.membership?.status_text || '-';
+
+        resBox.innerHTML = `
+          <div class="section">
+            <div class="section-head">
+              <i class="fa-solid fa-id-card"></i>
+              <div class="section-title">Membership Circle</div>
+            </div>
+
+            <div class="membership-card">
+              <div class="membership-row">
+                <div class="membership-label">MSISDN</div>
+                <div class="membership-value">${escapeHtml(nomor62)}</div>
+              </div>
+
+              <div class="membership-row">
+                <div class="membership-label">Status</div>
+                <div class="membership-value ${canSubscribe ? 'green' : 'red'}">
+                  ${canSubscribe ? 'Bisa beli paket Circle' : 'Tidak bisa beli paket Circle'}
+                </div>
+              </div>
+
+              <div class="membership-row">
+                <div class="membership-label">Keterangan</div>
+                <div class="membership-value">${escapeHtml(infoText)}</div>
+              </div>
+
+              <div class="membership-row">
+                <div class="membership-label">Sumber</div>
+                <div class="membership-value">leonskennedy</div>
+              </div>
+            </div>
+
+            <div class="status ${canSubscribe ? 'green' : 'red'}">
+              <i class="fa-solid ${canSubscribe ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+              <span>
+                ${canSubscribe
+                  ? 'Nomor ini bisa lanjut beli paket Circle.'
+                  : 'Nomor ini tidak bisa beli paket Circle saat ini.'}
+              </span>
+            </div>
+          </div>
+        `;
         return;
       }
 
-      hasil.innerHTML = `
-        <div class="notice red">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-          Gagal ambil data membership.
+      resBox.innerHTML = `
+        <div class="status red">
+          <i class="fa-solid fa-circle-xmark"></i>
+          <span>Gagal mengambil data membership</span>
         </div>
       `;
-      return;
-    }catch(err){
-      hasil.innerHTML = `
-        <div class="notice red">
+    }catch(e){
+      resBox.innerHTML = `
+        <div class="status red">
           <i class="fa-solid fa-triangle-exclamation"></i>
-          Semua endpoint membership gagal.
+          <span>Semua endpoint membership gagal</span>
         </div>
       `;
-      console.error(err);
     }
   }finally{
-    unsetLoading(btnMembership);
+    unsetLoading(btn);
   }
 }
 
-async function cekKuota(){
-  const nomor0 = to0(input.value);
+async function cek(){
+  const nomor = normalizeNumber(document.getElementById('nomor').value);
+  const resBox = document.getElementById('result');
+  const btn = document.getElementById('btnCek');
 
-  if(!nomor0 || nomor0.length < 10){
-    showInputError();
+  if(!nomor){
+    resBox.innerHTML = `
+      <div class="status red">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>Nomor belum diisi</span>
+      </div>
+    `;
     return;
   }
 
-  setLoading(btnKuota, "Loading");
-
-  hasil.innerHTML = `
-    <div class="notice gray">
-      <i class="fa-solid fa-spinner fa-spin"></i>
-      Sedang cek kuota...
-    </div>
-  `;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
   try{
-    const res = await fetch(KUOTA_ENDPOINT + '?number=' + encodeURIComponent(nomor0), {
+    const res = await fetch('/api/cek?number=' + encodeURIComponent(nomor), {
       cache: 'no-store'
     });
     const raw = await res.text();
@@ -452,125 +802,50 @@ async function cekKuota(){
     try{
       data = JSON.parse(raw);
     }catch{
-      hasil.innerHTML = `
-        <div class="notice red">
+      resBox.innerHTML = `
+        <div class="status red">
           <i class="fa-solid fa-triangle-exclamation"></i>
-          Response API kuota bukan JSON valid.
+          <span>Response API bukan JSON valid</span>
         </div>
       `;
       return;
     }
 
     if(!data.success){
-      hasil.innerHTML = `
-        <div class="notice red">
+      resBox.innerHTML = `
+        <div class="status red">
           <i class="fa-solid fa-circle-xmark"></i>
-          ${escapeHtml(data.message || 'Gagal mengambil data kuota')}
+          <span>${escapeHtml(data.message || 'Gagal mengambil data')}</span>
         </div>
       `;
       return;
     }
 
     const s = data.data?.subs_info || {};
+    const v = s.volte || {};
     const packages = data.data?.package_info?.packages || [];
 
-    let totalGb = 0;
-    let usedGb = 0;
-    let remainingGb = 0;
+    resBox.innerHTML = `
+      ${renderSubsCompact(s, nomor, v)}
 
-    for(const pkg of packages){
-      const quotas = Array.isArray(pkg.quotas) ? pkg.quotas : [];
-      for(const q of quotas){
-        const total = parseFloat(String(q.total || '0').replace(',', '.').replace(/[^\d.]/g,''));
-        const remaining = parseFloat(String(q.remaining || '0').replace(',', '.').replace(/[^\d.]/g,''));
-        if(!isNaN(total)) totalGb += total;
-        if(!isNaN(remaining)) remainingGb += remaining;
-      }
-    }
-
-    usedGb = totalGb - remainingGb;
-    if(usedGb < 0) usedGb = 0;
-
-    let usagePct = totalGb > 0 ? (usedGb / totalGb) * 100 : 0;
-    if(usagePct < 0) usagePct = 0;
-    if(usagePct > 100) usagePct = 100;
-
-    const totalText = `${totalGb.toFixed(2)} GB`;
-    const usedText = `${usedGb.toFixed(2)} GB`;
-    const remainingText = `${remainingGb.toFixed(2)} GB`;
-    const pctText = `${Math.round(usagePct)}%`;
-
-    let progressColor = "linear-gradient(90deg,#22c55e,#16a34a)";
-    let notice = "";
-
-    if (remainingGb <= 0 && totalGb > 0) {
-      progressColor = "linear-gradient(90deg,#ef4444,#dc2626)";
-      notice = `
-        <div class="notice red">
-          <i class="fa-solid fa-circle-exclamation"></i>
-          Kuota XL/AXIS terdeteksi habis.
+      <div class="section">
+        <div class="section-head">
+          <i class="fa-solid fa-box-open"></i>
+          <div class="section-title">Paket Data</div>
         </div>
-      `;
-    }
-
-    hasil.innerHTML = `
-      <div class="card">
-        <div class="title"><i class="fa-solid fa-chart-simple"></i> Kuota XL / AXIS</div>
-
-        <div class="row">
-          <div class="label">MSISDN</div>
-          <div class="value">${escapeHtml(s.msisdn || nomor0)}</div>
-        </div>
-
-        <div class="row">
-          <div class="label">Operator</div>
-          <div class="value">${escapeHtml(s.operator || "-")}</div>
-        </div>
-
-        <div class="row" style="display:flex;justify-content:space-between;align-items:center;">
-          <div class="label">Sisa Kuota</div>
-          <div class="value"><b>${escapeHtml(remainingText)}</b></div>
-        </div>
-
-        <div class="progress">
-          <div class="progress-bar" style="width:${usagePct}%; background:${progressColor};"></div>
-        </div>
-
-        <div class="grid">
-          <div class="box-mini">
-            <div class="label">Total</div>
-            <div class="value">${escapeHtml(totalText)}</div>
-          </div>
-
-          <div class="box-mini">
-            <div class="label">Terpakai</div>
-            <div class="value">${escapeHtml(usedText)} (${escapeHtml(pctText)})</div>
-          </div>
-
-          <div class="box-mini">
-            <div class="label">Aktif Sampai</div>
-            <div class="value">${escapeHtml(s.exp_date || "-")}</div>
-          </div>
-
-          <div class="box-mini">
-            <div class="label">Tenggang</div>
-            <div class="value">${escapeHtml(s.grace_until || "-")}</div>
-          </div>
-        </div>
-
-        ${notice}
+        ${renderPackages(packages)}
       </div>
     `;
   }catch(e){
-    hasil.innerHTML = `
-      <div class="notice red">
+    resBox.innerHTML = `
+      <div class="status red">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        Error kuota.
+        <span>Error ambil data</span>
       </div>
     `;
-    console.error(e);
   }finally{
-    unsetLoading(btnKuota);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Cek Kuota';
   }
 }
 </script>
