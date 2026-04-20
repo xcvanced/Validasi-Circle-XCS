@@ -333,7 +333,7 @@ async function cekMembership(){
 
       if(dataProxy && dataProxy.success === true && dataProxy.data){
         const canSubscribe = dataProxy.data.can_subscribe === true;
-        const statusText = canSubscribe ? "Bisa beli paket Circle" : "Tidak bisa beli paket Circle";
+        const statusText = canSubscribe ? "Tidak tergabung Dalam Circle" : "Masih/Sedang Tergabung Dalam Circle atau Umur kartu masih di bawah 60 hari";
         const statusColor = canSubscribe ? "green" : "red";
 
         let notice = "";
