@@ -94,11 +94,6 @@ button{
   cursor:pointer;
 }
 
-button:disabled{
-  opacity:.7;
-  cursor:not-allowed;
-}
-
 #hasil{
   margin-top:16px;
 }
@@ -133,7 +128,6 @@ button:disabled{
 
 .red{color:#ef4444;font-weight:700;}
 .green{color:#22c55e;font-weight:700;}
-.gray{color:#6b7280;font-weight:700;}
 
 .notice{
   margin-top:14px;
@@ -227,8 +221,8 @@ button:disabled{
   </div>
 
   <div class="btn-group">
-    <button onclick="cekMembership()" id="btnMembership">Validasi Membership</button>
-    <button onclick="cekKuota()" id="btnKuota">Cek Kuota</button>
+    <button onclick="cekMembership()">Validasi Membership</button>
+    <button onclick="cekKuota()">Cek Kuota</button>
   </div>
 
   <div id="hasil">Belum ada data.</div>
@@ -239,11 +233,11 @@ button:disabled{
 <script>
 const input = document.getElementById("msisdn");
 const hasil = document.getElementById("hasil");
-const btnMembership = document.getElementById("btnMembership");
-const btnKuota = document.getElementById("btnKuota");
 
 /* =========================================
    FORMAT TAMPILAN INPUT -> SELALU 0...
+   Contoh:
+   +62 878-7247-9418 -> 087872479418
 ========================================= */
 function normalizeInputNumber(value){
   let n = String(value || '').replace(/[^\d+]/g, '');
@@ -270,7 +264,7 @@ function normalizeInputNumber(value){
 }
 
 /* =========================================
-   FORMAT KE ENDPOINT LEON -> 62...
+   FORMAT KE ENDPOINT -> SELALU 62...
 ========================================= */
 function formatMSISDN(value){
   let n = normalizeInputNumber(value);
@@ -281,13 +275,15 @@ function formatMSISDN(value){
     n = '62' + n.slice(1);
   } else if (n.startsWith('8')) {
     n = '62' + n;
+  } else if (n.startsWith('62')) {
+    // biarkan
   }
 
   return n;
 }
 
 /* =========================================
-   FORMAT KE ENDPOINT BENDITH/PROXY -> 0...
+   FORMAT KE BENDITH -> SELALU 0...
 ========================================= */
 function formatMSISDNZero(value){
   let n = normalizeInputNumber(value);
@@ -301,28 +297,6 @@ function formatMSISDNZero(value){
   }
 
   return n;
-}
-
-function escapeHtml(str){
-  return String(str ?? "-")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function setLoading(button, text){
-  button.disabled = true;
-  button.dataset.originalText = button.innerHTML;
-  button.innerHTML = text;
-}
-
-function unsetLoading(button){
-  button.disabled = false;
-  if(button.dataset.originalText){
-    button.innerHTML = button.dataset.originalText;
-  }
 }
 
 /* auto rapikan saat ketik */
@@ -339,21 +313,20 @@ input.addEventListener('paste', function(){
 
 /* ================= MEMBERSHIP ================= */
 async function cekMembership(){
-  const msisdn62 = formatMSISDN(input.value);
-  const msisdn0 = formatMSISDNZero(input.value);
+  const msisdn = formatMSISDN(input.value);
+  const msisdnZero = formatMSISDNZero(input.value);
 
-  if(!msisdn0){
+  if(!msisdnZero){
     hasil.innerHTML = "Isi nomor dulu";
     return;
   }
 
-  setLoading(btnMembership, "Loading...");
   hasil.innerHTML = "Loading...";
 
   try{
-    /* 1. PRIORITAS PROXY BENDITH */
+    /* PRIORITAS BENDITH VIA PROXY SENDIRI */
     try{
-      const resProxy = await fetch(`/api/membership?number=${encodeURIComponent(msisdn0)}`, {
+      const resProxy = await fetch(`/api/membership?number=${encodeURIComponent(msisdnZero)}`, {
         cache: 'no-store'
       });
       const rawProxy = await resProxy.text();
@@ -367,7 +340,6 @@ async function cekMembership(){
 
       if(dataProxy && dataProxy.success === true && dataProxy.data){
         const canSubscribe = dataProxy.data.can_subscribe === true;
-        const infoText = dataProxy.data.information || "-";
         const statusText = canSubscribe ? "Bisa beli paket Circle" : "Tidak bisa beli paket Circle";
         const statusColor = canSubscribe ? "green" : "red";
 
@@ -376,14 +348,14 @@ async function cekMembership(){
         if(statusColor === "red"){
           notice = `<div class="notice red">
             <i class="fa-solid fa-circle-xmark"></i>
-            Nomor ini sudah terdaftar di group Circle, jadi belum bisa beli lagi.
+            Tidak bisa beli paket XL Circle saat ini, coba lagi bulan depan.
           </div>`;
         }
 
         if(statusColor === "green"){
           notice = `<div class="notice green">
             <i class="fa-solid fa-circle-check"></i>
-            Nomor ini belum terdaftar di group Circle, jadi bisa lanjut beli paket.
+            Bisa beli paket XL Circle sekarang!
           </div>`;
         }
 
@@ -393,17 +365,12 @@ async function cekMembership(){
 
             <div class="row">
               <div class="label">MSISDN</div>
-              <div class="value">${escapeHtml(msisdn0)}</div>
+              <div class="value">${msisdnZero || "-"}</div>
             </div>
 
             <div class="row">
               <div class="label">Status</div>
-              <div class="value ${statusColor}">${escapeHtml(statusText)}</div>
-            </div>
-
-            <div class="row">
-              <div class="label">Keterangan</div>
-              <div class="value">${escapeHtml(infoText)}</div>
+              <div class="value ${statusColor}">${statusText}</div>
             </div>
 
             ${notice}
@@ -415,108 +382,81 @@ async function cekMembership(){
       console.warn("Proxy bendith gagal:", e);
     }
 
-    /* 2. FALLBACK LEONSKENNEDY */
-    try{
-      const res = await fetch(`https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${encodeURIComponent(msisdn62)}`, {
-        cache: 'no-store'
-      });
-      const raw = await res.text();
+    /* FALLBACK KE LEONSKENNEDY */
+    const res = await fetch(`https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${msisdn}`);
+    const data = await res.json();
 
-      let data;
-      try{
-        data = JSON.parse(raw);
-      }catch{
-        data = null;
-      }
-
-      if(!data || !data.ok){
-        hasil.innerHTML = "Gagal ambil data";
-        return;
-      }
-
-      const statusText = data.membership?.status_text || "-";
-      const statusColor = (data.membership?.status_color || "gray").toLowerCase();
-
-      let notice = "";
-
-      if(statusColor === "red"){
-        notice = `<div class="notice red">
-          <i class="fa-solid fa-circle-xmark"></i>
-          Tidak bisa beli paket XL Circle saat ini, coba lagi bulan depan.
-        </div>`;
-      }
-
-      if(statusColor === "green"){
-        notice = `<div class="notice green">
-          <i class="fa-solid fa-circle-check"></i>
-          Bisa beli paket XL Circle sekarang!
-        </div>`;
-      }
-
-      hasil.innerHTML = `
-        <div class="card">
-          <div class="title"><i class="fa-solid fa-id-card"></i> Membership</div>
-
-          <div class="row">
-            <div class="label">MSISDN</div>
-            <div class="value">${escapeHtml(data.msisdn || msisdn62)}</div>
-          </div>
-
-          <div class="row">
-            <div class="label">Status</div>
-            <div class="value ${statusColor}">${escapeHtml(statusText)}</div>
-          </div>
-
-          ${notice}
-        </div>
-      `;
+    if(!data.ok){
+      hasil.innerHTML = "Gagal ambil data";
       return;
-
-    }catch(e){
-      hasil.innerHTML = "Error membership";
-      console.error(e);
     }
-  }finally{
-    unsetLoading(btnMembership);
+
+    const statusText = data.membership?.status_text || "-";
+    const statusColor = (data.membership?.status_color || "gray").toLowerCase();
+
+    let notice = "";
+
+    if(statusColor === "red"){
+      notice = `<div class="notice red">
+        <i class="fa-solid fa-circle-xmark"></i>
+        Tidak bisa beli paket XL Circle saat ini, coba lagi bulan depan.
+      </div>`;
+    }
+
+    if(statusColor === "green"){
+      notice = `<div class="notice green">
+        <i class="fa-solid fa-circle-check"></i>
+        Bisa beli paket XL Circle sekarang!
+      </div>`;
+    }
+
+    hasil.innerHTML = `
+      <div class="card">
+        <div class="title"><i class="fa-solid fa-id-card"></i> Membership</div>
+
+        <div class="row">
+          <div class="label">MSISDN</div>
+          <div class="value">${data.msisdn || "-"}</div>
+        </div>
+
+        <div class="row">
+          <div class="label">Status</div>
+          <div class="value ${statusColor}">${statusText}</div>
+        </div>
+
+        ${notice}
+      </div>
+    `;
+
+  }catch(e){
+    hasil.innerHTML = "Error membership";
+    console.error(e);
   }
 }
 
 /* ================= KUOTA ================= */
 async function cekKuota(){
-  const msisdn62 = formatMSISDN(input.value);
-  const msisdn0 = formatMSISDNZero(input.value);
+  const msisdn = formatMSISDN(input.value);
+  const msisdnZero = formatMSISDNZero(input.value);
 
-  if(!msisdn0){
+  if(!msisdnZero){
     hasil.innerHTML = "Isi nomor dulu";
     return;
   }
 
-  setLoading(btnKuota, "Loading...");
   hasil.innerHTML = "Loading...";
 
   try{
-    /* kuota lewat proxy agar lolos CORS */
-    const res = await fetch(`/api/cek?number=${encodeURIComponent(msisdn0)}`, {
-      cache: 'no-store'
-    });
-    const raw = await res.text();
+    const res = await fetch(`/api/cek?number=${encodeURIComponent(msisdnZero)}`);
+    const data = await res.json();
 
-    let data;
-    try{
-      data = JSON.parse(raw);
-    }catch{
+    if(!data.success){
       hasil.innerHTML = "Gagal ambil kuota";
       return;
     }
 
-    if(!data.success){
-      hasil.innerHTML = escapeHtml(data.message || "Gagal ambil kuota");
-      return;
-    }
-
     const subs = data.data?.subs_info || {};
-    const pkgInfo = data.data?.package_info || {};
-    const packages = Array.isArray(pkgInfo.packages) ? pkgInfo.packages : [];
+    const packages = data.data?.package_info?.packages || [];
 
     let totalGb = 0;
     let usedGb = 0;
@@ -525,30 +465,28 @@ async function cekKuota(){
     for(const pkg of packages){
       const quotas = Array.isArray(pkg.quotas) ? pkg.quotas : [];
       for(const q of quotas){
-        const total = parseFloat(String(q.total || "0").replace(",", ".").replace(/[^\d.]/g, ""));
-        const remaining = parseFloat(String(q.remaining || "0").replace(",", ".").replace(/[^\d.]/g, ""));
-        const percent = parseFloat(String(q.percent || "0").replace(",", ".").replace(/[^\d.]/g, ""));
+        const total = parseFloat(String(q.total || 0).replace(',', '.').replace(/[^\d.]/g, ''));
+        const remaining = parseFloat(String(q.remaining || 0).replace(',', '.').replace(/[^\d.]/g, ''));
+        const percent = parseFloat(String(q.percent || 0).replace(',', '.').replace(/[^\d.]/g, ''));
 
         if(!isNaN(total)) totalGb += total;
         if(!isNaN(remaining)) remainingGb += remaining;
-
         if(!isNaN(total) && !isNaN(percent) && total > 0){
-          const used = total * (percent / 100);
-          usedGb += used;
+          usedGb += total * (percent / 100);
         }
       }
     }
 
+    if (totalGb < 0) totalGb = 0;
     if (usedGb < 0) usedGb = 0;
     if (remainingGb < 0) remainingGb = 0;
-    if (totalGb < 0) totalGb = 0;
 
     if (usedGb > totalGb && totalGb > 0) {
       usedGb = totalGb;
     }
 
-    let joined = subs.id_verified || "-";
-    let expired = subs.exp_date || "-";
+    const joined = subs.id_verified || "-";
+    const expired = subs.exp_date || "-";
 
     let isExpired = false;
     if (expired && expired !== "-") {
@@ -630,12 +568,12 @@ async function cekKuota(){
 
           <div class="box-mini">
             <div class="label">Bergabung</div>
-            <div class="value">${escapeHtml(joined)}</div>
+            <div class="value">${joined}</div>
           </div>
 
           <div class="box-mini">
             <div class="label">Kadaluwarsa</div>
-            <div class="value">${escapeHtml(expired)}</div>
+            <div class="value">${expired}</div>
           </div>
         </div>
 
@@ -646,8 +584,6 @@ async function cekKuota(){
   }catch(e){
     hasil.innerHTML = "Error kuota";
     console.error(e);
-  }finally{
-    unsetLoading(btnKuota);
   }
 }
 </script>
