@@ -242,22 +242,27 @@ const hasil = document.getElementById("hasil");
 function normalizeInputNumber(value){
   let n = String(value || '').replace(/[^\d+]/g, '');
 
+  // hapus semua selain digit, tapi biarkan + di awal dulu
   if (n.startsWith('+')) {
     n = '+' + n.slice(1).replace(/\D/g, '');
   } else {
     n = n.replace(/\D/g, '');
   }
 
+  // ubah +62... jadi 0...
   if (n.startsWith('+62')) {
     n = '0' + n.slice(3);
   }
+  // ubah 62... jadi 0...
   else if (n.startsWith('62')) {
     n = '0' + n.slice(2);
   }
+  // kalau mulai 8, anggap nomor HP lokal
   else if (n.startsWith('8')) {
     n = '0' + n;
   }
 
+  // bersihkan lagi, pastikan hanya digit
   n = n.replace(/\D/g, '');
 
   return n;
@@ -265,6 +270,8 @@ function normalizeInputNumber(value){
 
 /* =========================================
    FORMAT KE ENDPOINT -> SELALU 62...
+   Contoh:
+   087872479418 -> 6287872479418
 ========================================= */
 function formatMSISDN(value){
   let n = normalizeInputNumber(value);
@@ -277,23 +284,6 @@ function formatMSISDN(value){
     n = '62' + n;
   } else if (n.startsWith('62')) {
     // biarkan
-  }
-
-  return n;
-}
-
-/* =========================================
-   FORMAT KE BENDITH -> SELALU 0...
-========================================= */
-function formatMSISDNZero(value){
-  let n = normalizeInputNumber(value);
-
-  if (!n) return '';
-
-  if (n.startsWith('62')) {
-    n = '0' + n.slice(2);
-  } else if (n.startsWith('8')) {
-    n = '0' + n;
   }
 
   return n;
@@ -314,7 +304,7 @@ input.addEventListener('paste', function(){
 /* ================= MEMBERSHIP ================= */
 async function cekMembership(){
   const msisdn = formatMSISDN(input.value);
-  const msisdnZero = formatMSISDNZero(input.value);
+  const msisdnZero = normalizeInputNumber(input.value); // format 0 untuk bendith
 
   if(!msisdnZero){
     hasil.innerHTML = "Isi nomor dulu";
@@ -324,16 +314,19 @@ async function cekMembership(){
   hasil.innerHTML = "Loading...";
 
   try{
-    /* PRIORITAS BENDITH VIA PROXY SENDIRI */
+    /* =========================
+       PRIORITAS: BENDITH (ANTI CORS VIA PROXY)
+    ========================== */
     try{
       const resProxy = await fetch(`/api/membership?number=${encodeURIComponent(msisdnZero)}`, {
         cache: 'no-store'
       });
-      const rawProxy = await resProxy.text();
+
+      const text = await resProxy.text();
 
       let dataProxy;
       try{
-        dataProxy = JSON.parse(rawProxy);
+        dataProxy = JSON.parse(text);
       }catch{
         dataProxy = null;
       }
@@ -378,11 +371,14 @@ async function cekMembership(){
         `;
         return;
       }
+
     }catch(e){
-      console.warn("Proxy bendith gagal:", e);
+      console.warn("Bendith gagal:", e);
     }
 
-    /* FALLBACK KE LEONSKENNEDY */
+    /* =========================
+       FALLBACK: LEONSKENNEDY
+    ========================== */
     const res = await fetch(`https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${msisdn}`);
     const data = await res.json();
 
@@ -437,9 +433,8 @@ async function cekMembership(){
 /* ================= KUOTA ================= */
 async function cekKuota(){
   const msisdn = formatMSISDN(input.value);
-  const msisdnZero = formatMSISDNZero(input.value);
 
-  if(!msisdnZero){
+  if(!msisdn){
     hasil.innerHTML = "Isi nomor dulu";
     return;
   }
@@ -447,46 +442,27 @@ async function cekKuota(){
   hasil.innerHTML = "Loading...";
 
   try{
-    const res = await fetch(`/api/cek?number=${encodeURIComponent(msisdnZero)}`);
+    const res = await fetch(`https://leonskennedy.my.id/cekcircle/cek_kuota.php?msisdn=${msisdn}`);
     const data = await res.json();
 
-    if(!data.success){
+    if(!data.ok){
       hasil.innerHTML = "Gagal ambil kuota";
       return;
     }
 
-    const subs = data.data?.subs_info || {};
-    const packages = data.data?.package_info?.packages || [];
+    const q = data.quota || {};
+    const lifecycle = data.lifecycle || {};
 
-    let totalGb = 0;
-    let usedGb = 0;
-    let remainingGb = 0;
+    let totalGb = parseFloat(q.allocation?.gb || 0);
+    let usedGb = parseFloat(q.used?.gb || 0);
+    let remainingGb = parseFloat(q.remaining?.gb || 0);
 
-    for(const pkg of packages){
-      const quotas = Array.isArray(pkg.quotas) ? pkg.quotas : [];
-      for(const q of quotas){
-        const total = parseFloat(String(q.total || 0).replace(',', '.').replace(/[^\d.]/g, ''));
-        const remaining = parseFloat(String(q.remaining || 0).replace(',', '.').replace(/[^\d.]/g, ''));
-        const percent = parseFloat(String(q.percent || 0).replace(',', '.').replace(/[^\d.]/g, ''));
-
-        if(!isNaN(total)) totalGb += total;
-        if(!isNaN(remaining)) remainingGb += remaining;
-        if(!isNaN(total) && !isNaN(percent) && total > 0){
-          usedGb += total * (percent / 100);
-        }
-      }
-    }
+    const joined = lifecycle.joined || "-";
+    const expired = lifecycle.expires || "-";
 
     if (totalGb < 0) totalGb = 0;
     if (usedGb < 0) usedGb = 0;
     if (remainingGb < 0) remainingGb = 0;
-
-    if (usedGb > totalGb && totalGb > 0) {
-      usedGb = totalGb;
-    }
-
-    const joined = subs.id_verified || "-";
-    const expired = subs.exp_date || "-";
 
     let isExpired = false;
     if (expired && expired !== "-") {
