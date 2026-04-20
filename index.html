@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XC-Store Checker</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:#f3f4f6;
+  padding:20px;
+}
+
+.box{
+  max-width:420px;
+  margin:40px auto;
+  background:#fff;
+  border-radius:24px;
+  padding:22px;
+  box-shadow:0 15px 40px rgba(0,0,0,.06);
+}
+
+h2 i{
+  font-size:35px;
+}
+
+h2{
+  font-size:25px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.badge{
+  font-size:9px;
+  font-weight:600;
+  padding:2px 6px;
+  border-radius:999px;
+  background:#fef9c3;
+  color:#92400e;
+  border:1px solid #fde68a;
+  position:relative;
+  top:-6px;
+}
+
+.desc{
+  font-size:14px;
+  color:#777;
+  margin:10px 0 18px;
+}
+
+.input-wrap{
+  position:relative;
+}
+
+.input-wrap i{
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#aaa;
+}
+
+input{
+  width:100%;
+  height:54px;
+  border-radius:16px;
+  border:1px solid #e5e7eb;
+  padding:0 14px 0 40px;
+  font-size:15px;
+}
+
+.btn-group{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+
+button{
+  flex:1;
+  height:50px;
+  border:none;
+  border-radius:16px;
+  background:#111;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.7;
+  cursor:not-allowed;
+}
+
+#hasil{
+  margin-top:16px;
+}
+
+.card{
+  background:#fafafa;
+  border-radius:18px;
+  padding:16px;
+  border:1px solid #eee;
+}
+
+.title{
+  font-weight:700;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.row{
+  margin-bottom:12px;
+}
+
+.label{
+  font-size:12px;
+  color:#777;
+}
+
+.value{
+  font-size:15px;
+  word-break:break-word;
+}
+
+.red{color:#ef4444;font-weight:700;}
+.green{color:#22c55e;font-weight:700;}
+.gray{color:#6b7280;font-weight:700;}
+
+.notice{
+  margin-top:14px;
+  padding:12px 14px;
+  font-size:13px;
+  font-weight:600;
+  line-height:1.6;
+  display:flex;
+  gap:10px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.05);
+  background:#fff;
+  box-shadow:0 6px 14px rgba(0,0,0,.04);
+}
+
+.notice.red{
+  background:#fef2f2;
+  border:1px solid #fecaca;
+  color:#b91c1c;
+}
+
+.notice.green{
+  background:#ecfdf5;
+  border:1px solid #bbf7d0;
+  color:#166534;
+}
+
+.notice.gray{
+  background:#f3f4f6;
+  border:1px solid #e5e7eb;
+  color:#374151;
+}
+
+.notice i{
+  font-size:16px;
+  margin-top:2px;
+}
+
+.progress{
+  height:12px;
+  background:#e5e7eb;
+  border-radius:999px;
+  overflow:hidden;
+  margin:10px 0 14px;
+}
+
+.progress-bar{
+  height:100%;
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.box-mini{
+  background:#fff;
+  border-radius:14px;
+  padding:10px;
+  border:1px solid #eee;
+}
+
+.footer{
+  text-align:center;
+  margin-top:24px;
+  font-size:12px;
+  color:#999;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>
+    <i class="fa-solid fa-sim-card"></i>
+    Circle Checker
+    <span class="badge">by XC-Store</span>
+  </h2>
+  <div class="desc">Validasi Membership & Cek Kuota XL Circle</div>
+
+  <div class="input-wrap">
+    <i class="fa-solid fa-phone"></i>
+    <input type="text" id="msisdn" placeholder="Masukkan nomor HP">
+  </div>
+
+  <div class="btn-group">
+    <button onclick="cekMembership()" id="btnMembership">Validasi Membership</button>
+    <button onclick="cekKuota()" id="btnKuota">Cek Kuota</button>
+  </div>
+
+  <div id="hasil">Belum ada data.</div>
+</div>
+
+<div class="footer">© 2026 XC-Store. All Rights Reserved.</div>
+
+<script>
+const input = document.getElementById("msisdn");
+const hasil = document.getElementById("hasil");
+const btnMembership = document.getElementById("btnMembership");
+const btnKuota = document.getElementById("btnKuota");
+
+const KUOTA_ENDPOINT = "/api/cek";
+
+function normalizeInputNumber(v){
+  let n = String(v || "").replace(/[^\d+]/g,'').trim();
+
+  if(n.startsWith('+62')) n = '0' + n.slice(3);
+  else if(n.startsWith('62')) n = '0' + n.slice(2);
+  else if(n.startsWith('8')) n = '0' + n;
+
+  n = n.replace(/\D/g,'');
+
+  return n;
+}
+
+function to0(v){
+  let n = normalizeInputNumber(v);
+  if(n.startsWith('62')) n = '0' + n.slice(2);
+  if(n.startsWith('8')) n = '0' + n;
+  return n;
+}
+
+function to62(v){
+  let n = normalizeInputNumber(v);
+  if(n.startsWith('0')) return '62' + n.slice(1);
+  if(n.startsWith('8')) return '62' + n;
+  return n;
+}
+
+function escapeHtml(str){
+  return String(str ?? "-")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+input.addEventListener("input", function(){
+  this.value = normalizeInputNumber(this.value);
+});
+
+function setLoading(button, textLoading){
+  button.disabled = true;
+  button.dataset.original = button.innerHTML;
+  button.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${textLoading}`;
+}
+
+function unsetLoading(button){
+  button.disabled = false;
+  if(button.dataset.original){
+    button.innerHTML = button.dataset.original;
+  }
+}
+
+function showInputError(){
+  hasil.innerHTML = `
+    <div class="notice red">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      Isi nomor HP yang valid dulu.
+    </div>
+  `;
+}
+
+function renderMembership(msisdn, canSubscribe, infoText, sourceName){
+  const statusColor = canSubscribe ? "green" : "red";
+  const statusText = canSubscribe ? "Bisa beli paket Circle" : "Tidak bisa beli paket Circle";
+
+  const notice = canSubscribe
+    ? `<div class="notice green"><i class="fa-solid fa-circle-check"></i>Nomor ini belum terdaftar di group Circle, jadi bisa lanjut beli paket.</div>`
+    : `<div class="notice red"><i class="fa-solid fa-circle-xmark"></i>Nomor ini sudah terdaftar di group Circle, jadi belum bisa beli lagi.</div>`;
+
+  hasil.innerHTML = `
+    <div class="card">
+      <div class="title"><i class="fa-solid fa-id-card"></i> Membership</div>
+
+      <div class="row">
+        <div class="label">MSISDN</div>
+        <div class="value">${escapeHtml(msisdn)}</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Status</div>
+        <div class="value ${statusColor}">${escapeHtml(statusText)}</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Keterangan</div>
+        <div class="value">${escapeHtml(infoText)}</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Sumber</div>
+        <div class="value">${escapeHtml(sourceName)}</div>
+      </div>
+
+      ${notice}
+    </div>
+  `;
+}
+
+async function cekMembership(){
+  const nomor0 = to0(input.value);
+  const nomor62 = to62(input.value);
+
+  if(!nomor0 || nomor0.length < 10){
+    showInputError();
+    return;
+  }
+
+  setLoading(btnMembership, "Loading");
+
+  hasil.innerHTML = `
+    <div class="notice gray">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Sedang validasi membership...
+    </div>
+  `;
+
+  try{
+    // 1. PRIORITAS BENDITH VIA PROXY SENDIRI
+    try{
+      const resProxy = await fetch('/api/membership?number=' + encodeURIComponent(nomor0), {
+        cache: 'no-store'
+      });
+      const rawProxy = await resProxy.text();
+
+      let dataProxy;
+      try{
+        dataProxy = JSON.parse(rawProxy);
+      }catch{
+        dataProxy = null;
+      }
+
+      if(dataProxy && dataProxy.success === true && dataProxy.data){
+        const canSubscribe = dataProxy.data.can_subscribe === true;
+        const infoText = dataProxy.data.information || "-";
+        renderMembership(nomor0, canSubscribe, infoText, "bendith-proxy");
+        return;
+      }
+    }catch(err){
+      console.warn("Proxy membership gagal:", err);
+    }
+
+    // 2. FALLBACK LEONSKENNEDY
+    try{
+      const resLeon = await fetch(`https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${encodeURIComponent(nomor62)}`, {
+        cache: 'no-store'
+      });
+      const rawLeon = await resLeon.text();
+
+      let dataLeon;
+      try{
+        dataLeon = JSON.parse(rawLeon);
+      }catch{
+        dataLeon = null;
+      }
+
+      if(dataLeon && dataLeon.ok === true){
+        const statusColor = String(dataLeon.membership?.status_color || "").toLowerCase();
+        const canSubscribe = statusColor === "green";
+        const infoText = dataLeon.membership?.status_text || "-";
+        renderMembership(nomor62, canSubscribe, infoText, "leonskennedy");
+        return;
+      }
+
+      hasil.innerHTML = `
+        <div class="notice red">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Gagal ambil data membership.
+        </div>
+      `;
+      return;
+    }catch(err){
+      hasil.innerHTML = `
+        <div class="notice red">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Semua endpoint membership gagal.
+        </div>
+      `;
+      console.error(err);
+    }
+  }finally{
+    unsetLoading(btnMembership);
+  }
+}
+
+async function cekKuota(){
+  const nomor0 = to0(input.value);
+
+  if(!nomor0 || nomor0.length < 10){
+    showInputError();
+    return;
+  }
+
+  setLoading(btnKuota, "Loading");
+
+  hasil.innerHTML = `
+    <div class="notice gray">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Sedang cek kuota...
+    </div>
+  `;
+
+  try{
+    const res = await fetch(KUOTA_ENDPOINT + '?number=' + encodeURIComponent(nomor0), {
+      cache: 'no-store'
+    });
+    const raw = await res.text();
+
+    let data;
+    try{
+      data = JSON.parse(raw);
+    }catch{
+      hasil.innerHTML = `
+        <div class="notice red">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Response API kuota bukan JSON valid.
+        </div>
+      `;
+      return;
+    }
+
+    if(!data.success){
+      hasil.innerHTML = `
+        <div class="notice red">
+          <i class="fa-solid fa-circle-xmark"></i>
+          ${escapeHtml(data.message || 'Gagal mengambil data kuota')}
+        </div>
+      `;
+      return;
+    }
+
+    const s = data.data?.subs_info || {};
+    const packages = data.data?.package_info?.packages || [];
+
+    let totalGb = 0;
+    let usedGb = 0;
+    let remainingGb = 0;
+
+    for(const pkg of packages){
+      const quotas = Array.isArray(pkg.quotas) ? pkg.quotas : [];
+      for(const q of quotas){
+        const total = parseFloat(String(q.total || '0').replace(',', '.').replace(/[^\d.]/g,''));
+        const remaining = parseFloat(String(q.remaining || '0').replace(',', '.').replace(/[^\d.]/g,''));
+        if(!isNaN(total)) totalGb += total;
+        if(!isNaN(remaining)) remainingGb += remaining;
+      }
+    }
+
+    usedGb = totalGb - remainingGb;
+    if(usedGb < 0) usedGb = 0;
+
+    let usagePct = totalGb > 0 ? (usedGb / totalGb) * 100 : 0;
+    if(usagePct < 0) usagePct = 0;
+    if(usagePct > 100) usagePct = 100;
+
+    const totalText = `${totalGb.toFixed(2)} GB`;
+    const usedText = `${usedGb.toFixed(2)} GB`;
+    const remainingText = `${remainingGb.toFixed(2)} GB`;
+    const pctText = `${Math.round(usagePct)}%`;
+
+    let progressColor = "linear-gradient(90deg,#22c55e,#16a34a)";
+    let notice = "";
+
+    if (remainingGb <= 0 && totalGb > 0) {
+      progressColor = "linear-gradient(90deg,#ef4444,#dc2626)";
+      notice = `
+        <div class="notice red">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          Kuota XL/AXIS terdeteksi habis.
+        </div>
+      `;
+    }
+
+    hasil.innerHTML = `
+      <div class="card">
+        <div class="title"><i class="fa-solid fa-chart-simple"></i> Kuota XL / AXIS</div>
+
+        <div class="row">
+          <div class="label">MSISDN</div>
+          <div class="value">${escapeHtml(s.msisdn || nomor0)}</div>
+        </div>
+
+        <div class="row">
+          <div class="label">Operator</div>
+          <div class="value">${escapeHtml(s.operator || "-")}</div>
+        </div>
+
+        <div class="row" style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="label">Sisa Kuota</div>
+          <div class="value"><b>${escapeHtml(remainingText)}</b></div>
+        </div>
+
+        <div class="progress">
+          <div class="progress-bar" style="width:${usagePct}%; background:${progressColor};"></div>
+        </div>
+
+        <div class="grid">
+          <div class="box-mini">
+            <div class="label">Total</div>
+            <div class="value">${escapeHtml(totalText)}</div>
+          </div>
+
+          <div class="box-mini">
+            <div class="label">Terpakai</div>
+            <div class="value">${escapeHtml(usedText)} (${escapeHtml(pctText)})</div>
+          </div>
+
+          <div class="box-mini">
+            <div class="label">Aktif Sampai</div>
+            <div class="value">${escapeHtml(s.exp_date || "-")}</div>
+          </div>
+
+          <div class="box-mini">
+            <div class="label">Tenggang</div>
+            <div class="value">${escapeHtml(s.grace_until || "-")}</div>
+          </div>
+        </div>
+
+        ${notice}
+      </div>
+    `;
+  }catch(e){
+    hasil.innerHTML = `
+      <div class="notice red">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Error kuota.
+      </div>
+    `;
+    console.error(e);
+  }finally{
+    unsetLoading(btnKuota);
+  }
+}
+</script>
+
+</body>
+</html>
