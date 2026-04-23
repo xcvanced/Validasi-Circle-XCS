@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const url = `https://xl-ku.my.id/end.php?check=circlemembership&number=${encodeURIComponent(number0)}`;
+  const url = `https://xl-ku.my.id/end.php?check=circle&number=${encodeURIComponent(number0)}`;
 
   try {
     const response = await fetch(url, {
