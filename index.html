@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kembali</title>
+<title>Circle Checker</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
@@ -34,6 +34,8 @@ h2{
   gap:8px;
 }
 
+h2 i{font-size:35px;}
+
 .badge{
   font-size:9px;
   font-weight:600;
@@ -52,9 +54,7 @@ h2{
   margin:10px 0 18px;
 }
 
-.input-wrap{
-  position:relative;
-}
+.input-wrap{position:relative;}
 
 .input-wrap i{
   position:absolute;
@@ -71,25 +71,80 @@ input{
   border:1px solid #e5e7eb;
   padding:0 14px 0 40px;
   font-size:15px;
-}
-
-.btn-group{
-  margin-top:12px;
+  outline:none;
 }
 
 button{
   width:100%;
   height:50px;
+  margin-top:12px;
   border:none;
   border-radius:16px;
   background:#111;
   color:#fff;
-  font-weight:600;
+  font-weight:700;
   cursor:pointer;
 }
 
-#hasil{
+button.loading{
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+button.loading::after{
+  content:"";
+  width:16px;
+  height:16px;
+  border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+
+@keyframes spin{to{transform:rotate(360deg);}}
+
+#hasil{margin-top:16px;}
+
+.empty{
   margin-top:16px;
+  padding:18px;
+  border-radius:18px;
+  background:#fafafa;
+  border:1px dashed #e5e7eb;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  animation:fadeIn .25s ease;
+}
+
+.empty i{
+  width:36px;
+  height:36px;
+  min-width:36px;
+  border-radius:50%;
+  background:#111;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+}
+
+.empty.loading-state i{
+  animation:spin .8s linear infinite;
+}
+
+.empty b{
+  display:block;
+  font-size:14px;
+}
+
+.empty span{
+  font-size:12px;
+  color:#777;
 }
 
 .card{
@@ -97,54 +152,49 @@ button{
   border-radius:18px;
   padding:16px;
   border:1px solid #eee;
+  animation:fadeIn .25s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(6px);}
+  to{opacity:1;transform:translateY(0);}
 }
 
 .title{
-  font-weight:700;
+  font-weight:800;
   margin-bottom:12px;
   display:flex;
   align-items:center;
   gap:8px;
 }
 
-.row{
-  margin-bottom:12px;
-}
+.label{font-size:12px;color:#777;}
+.value{font-size:15px;margin-bottom:10px;}
 
-.label{
-  font-size:12px;
-  color:#777;
-}
-
-.value{
-  font-size:15px;
-}
-
-.red{color:#ef4444;font-weight:700;}
-.green{color:#22c55e;font-weight:700;}
+.red{color:#ef4444;font-weight:800;}
+.green{color:#22c55e;font-weight:800;}
 
 .notice{
   margin-top:14px;
   padding:16px 18px;
   font-size:13px;
-  font-weight:600;
+  font-weight:700;
   line-height:1.6;
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   gap:12px;
-  border-radius:16px;
+  border-radius:18px;
 }
 
 .notice i{
-  flex:0 0 18px;
-  width:18px;
-  height:18px;
+  width:22px;
+  height:22px;
+  min-width:22px;
+  border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:14px;
-  line-height:1;
-  margin-top:3px;
+  font-size:11px;
 }
 
 .notice.red{
@@ -157,6 +207,16 @@ button{
   background:#ecfdf5;
   border:1px solid #bbf7d0;
   color:#166534;
+}
+
+.notice.red i{
+  background:#b91c1c;
+  color:#fff;
+}
+
+.notice.green i{
+  background:#166534;
+  color:#fff;
 }
 
 .footer{
@@ -184,11 +244,15 @@ button{
     <input type="text" id="msisdn" placeholder="Masukkan nomor HP" inputmode="numeric" autocomplete="off">
   </div>
 
-  <div class="btn-group">
-    <button onclick="cekMembership()">Validasi Membership</button>
-  </div>
+  <button id="btnMembership" onclick="cekMembership()">Validasi Membership</button>
 
-  <div id="hasil">Belum ada data.</div>
+  <div id="hasil" class="empty">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <div>
+      <b>Belum ada pengecekan</b>
+      <span>Masukkan nomor lalu klik validasi</span>
+    </div>
+  </div>
 </div>
 
 <div class="footer">© 2026 XC-Store. All Rights Reserved.</div>
@@ -196,6 +260,28 @@ button{
 <script>
 const input = document.getElementById("msisdn");
 const hasil = document.getElementById("hasil");
+const btn = document.getElementById("btnMembership");
+
+function setLoading(x){
+  if(x){
+    btn.classList.add("loading");
+    btn.innerHTML = "Memvalidasi";
+  }else{
+    btn.classList.remove("loading");
+    btn.innerHTML = "Validasi Membership";
+  }
+}
+
+function showEmpty(icon, title, desc, extraClass = ""){
+  hasil.className = `empty ${extraClass}`.trim();
+  hasil.innerHTML = `
+    <i class="${icon}"></i>
+    <div>
+      <b>${title}</b>
+      <span>${desc}</span>
+    </div>
+  `;
+}
 
 /* FORMAT INPUT */
 function normalizeInputNumber(value){
@@ -240,11 +326,21 @@ async function cekMembership(){
   const msisdnZero = normalizeInputNumber(input.value);
 
   if(!msisdnZero){
-    hasil.innerHTML = "Isi nomor dulu";
+    showEmpty(
+      "fa-solid fa-triangle-exclamation",
+      "Nomor belum diisi",
+      "Masukkan nomor HP terlebih dahulu"
+    );
     return;
   }
 
-  hasil.innerHTML = "Loading...";
+  setLoading(true);
+  showEmpty(
+    "fa-solid fa-spinner",
+    "Sedang memvalidasi",
+    "Mohon tunggu sebentar",
+    "loading-state"
+  );
 
   try{
     try{
@@ -281,53 +377,71 @@ async function cekMembership(){
           statusColor = canSubscribe ? "green" : "red";
         }
 
-        let notice = statusColor === "green"
-          ? `<div class="notice green"><i class="fa-solid fa-circle-check"></i>Bisa beli paket XL Circle sekarang!</div>`
-          : `<div class="notice red"><i class="fa-solid fa-circle-xmark"></i>Tidak bisa beli paket XL Circle saat ini, coba lagi bulan depan.</div>`;
-
-        hasil.innerHTML = `
-          <div class="card">
-            <div class="title"><i class="fa-solid fa-id-card"></i> Membership</div>
-            <div class="row"><div class="label">MSISDN</div><div class="value">${msisdnZero}</div></div>
-            <div class="row"><div class="label">Status</div><div class="value ${statusColor}">${statusText}</div></div>
-            ${notice}
-          </div>
-        `;
+        tampilkanHasil(msisdnZero, statusText, statusColor);
         return;
       }
 
     }catch(e){
-      console.warn("Bendith gagal:", e);
+      console.warn("Proxy gagal:", e);
     }
 
     const res = await fetch(`https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${msisdn}`);
     const data = await res.json();
 
     if(!data.ok){
-      hasil.innerHTML = "Gagal ambil data";
+      showEmpty(
+        "fa-solid fa-triangle-exclamation",
+        "Gagal mengambil data",
+        "Silakan coba lagi beberapa saat"
+      );
       return;
     }
 
     const statusText = data.membership?.status_text || "-";
     const statusColor = (data.membership?.status_color || "gray").toLowerCase();
 
-    let notice = statusColor === "green"
-      ? `<div class="notice green"><i class="fa-solid fa-circle-check"></i>Bisa beli paket XL Circle sekarang!</div>`
-      : `<div class="notice red"><i class="fa-solid fa-circle-xmark"></i>Tidak bisa beli paket XL Circle saat ini, coba lagi bulan depan.</div>`;
-
-    hasil.innerHTML = `
-      <div class="card">
-        <div class="title"><i class="fa-solid fa-id-card"></i> Membership</div>
-        <div class="row"><div class="label">MSISDN</div><div class="value">${data.msisdn}</div></div>
-        <div class="row"><div class="label">Status</div><div class="value ${statusColor}">${statusText}</div></div>
-        ${notice}
-      </div>
-    `;
+    tampilkanHasil(data.msisdn || msisdn, statusText, statusColor);
 
   }catch(e){
-    hasil.innerHTML = "Error membership";
+    showEmpty(
+      "fa-solid fa-triangle-exclamation",
+      "Terjadi kesalahan",
+      "Coba lagi beberapa saat"
+    );
     console.error(e);
+  }finally{
+    setLoading(false);
   }
+}
+
+function tampilkanHasil(msisdn, statusText, statusColor){
+  let notice = "";
+
+  if(statusColor === "green"){
+    notice = `
+      <div class="notice green">
+        <i class="fa-solid fa-check"></i>
+        <div>Bisa beli paket XL Circle sekarang!</div>
+      </div>`;
+  }else{
+    notice = `
+      <div class="notice red">
+        <i class="fa-solid fa-xmark"></i>
+        <div>Tidak bisa beli paket XL Circle saat ini, coba lagi bulan depan.</div>
+      </div>`;
+  }
+
+  hasil.className = "";
+  hasil.innerHTML = `
+    <div class="card">
+      <div class="title"><i class="fa-solid fa-id-card"></i> Membership</div>
+      <div class="label">MSISDN</div>
+      <div class="value">${msisdn}</div>
+      <div class="label">Status</div>
+      <div class="value ${statusColor}">${statusText}</div>
+      ${notice}
+    </div>
+  `;
 }
 </script>
 
