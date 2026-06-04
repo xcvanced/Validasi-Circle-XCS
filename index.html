@@ -360,15 +360,15 @@ async function cekMembership(){
         let statusText = "";
         let statusColor = "";
 
-        if(info.includes("sudah terdaftar")){
+        if(info.includes("Masih/Sedang terdaftar di circle")){
           statusText = "Masih/Sedang Tergabung Dalam Circle";
           statusColor = "red";
         }
-        else if(info.includes("belum memenuhi syarat")){
+        else if(info.includes("Nomor belum memenuhi syarat")){
           statusText = "Umur kartu masih di bawah 60 hari";
           statusColor = "red";
         }
-        else if(info.includes("belum terdaftar")){
+        else if(info.includes("Belum terdaftar di group circle")){
           statusText = "Tidak tergabung Dalam Circle";
           statusColor = "green";
         }
