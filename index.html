@@ -383,7 +383,7 @@ async function cekMembership(){
       console.warn("Proxy gagal:", e);
     }
 
-    const res = await fetch(`https://leons-kennedy.my.id/cekcircle/cek_membership.php?msisdn=${msisdn}`);
+    const res = await fetch(`https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${msisdn}`);
     const data = await res.json();
 
     if(!data.ok){
