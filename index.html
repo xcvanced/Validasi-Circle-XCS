@@ -283,7 +283,6 @@ function showEmpty(icon, title, desc, extraClass = ""){
   `;
 }
 
-/* FORMAT INPUT */
 function normalizeInputNumber(value){
   let n = String(value || '').replace(/[^\d+]/g, '');
 
@@ -320,7 +319,6 @@ input.addEventListener('paste', function(){
   }, 0);
 });
 
-/* ================= MEMBERSHIP ================= */
 async function cekMembership(){
   const msisdn = formatMSISDN(input.value);
   const msisdnZero = normalizeInputNumber(input.value);
@@ -349,33 +347,33 @@ async function cekMembership(){
       });
 
       const text = await resProxy.text();
+      console.log("Response API Pertama:", text);
 
       let dataProxy;
       try{ dataProxy = JSON.parse(text); }catch{ dataProxy = null; }
 
       if(dataProxy && dataProxy.success === true && dataProxy.data){
         const canSubscribe = dataProxy.data.can_subscribe === true;
-        const info = (dataProxy.data.information || "").toLowerCase();
+        const infoOriginal = dataProxy.data.information || "";
+        const info = infoOriginal.toLowerCase();
 
-        let statusText = "";
-        let statusColor = "";
+        let statusText = infoOriginal || (canSubscribe ? "Bisa beli paket Circle" : "Tidak bisa beli paket Circle");
+        let statusColor = canSubscribe ? "green" : "red";
 
-        if(info.includes("Masih/Sedang terdaftar di circle")){
+        /* ===== MAPPING API PERTAMA ===== */
+        if(info.includes("masih/sedang terdaftar di circle")){
           statusText = "Masih/Sedang Tergabung Dalam Circle";
           statusColor = "red";
         }
-        else if(info.includes("Nomor belum memenuhi syarat")){
+        else if(info.includes("nomor belum memenuhi syarat")){
           statusText = "Umur kartu masih di bawah 60 hari";
           statusColor = "red";
         }
-        else if(info.includes("Belum terdaftar di group circle")){
+        else if(info.includes("belum terdaftar di group circle")){
           statusText = "Tidak tergabung Dalam Circle";
           statusColor = "green";
         }
-        else{
-          statusText = canSubscribe ? "Bisa beli paket Circle" : "Tidak bisa beli paket Circle";
-          statusColor = canSubscribe ? "green" : "red";
-        }
+        /* ===== AKHIR MAPPING API PERTAMA ===== */
 
         tampilkanHasil(msisdnZero, statusText, statusColor);
         return;
@@ -397,6 +395,7 @@ async function cekMembership(){
       return;
     }
 
+    /* LEON KENNEDY: TETAP PAKAI RESPON ASLI */
     const statusText = data.membership?.status_text || "-";
     const statusColor = (data.membership?.status_color || "gray").toLowerCase();
 
