@@ -352,7 +352,7 @@ async function cekMembership(){
       let dataProxy;
       try{ dataProxy = JSON.parse(text); }catch{ dataProxy = null; }
 
-      if(dataProxy && dataProxy.success === true && dataProxy.data){
+      if(false){
         const canSubscribe = dataProxy.data.can_subscribe === true;
         const infoOriginal = dataProxy.data.information || "";
         const info = infoOriginal.toLowerCase();
